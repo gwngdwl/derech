@@ -5,7 +5,6 @@ import 'package:sqlite3/sqlite3.dart';
 import '../models/place.dart';
 import '../models/road_segment.dart';
 import '../rendering/gpkg_geometry_parser.dart';
-import '../services/projection_utils.dart';
 
 /// שירות גישה לנתוני ה-GeoPackage (SQLite)
 class GpkgService {
@@ -55,10 +54,7 @@ class GpkgService {
         $fclassWhere
     ''';
 
-    final minPt = ProjectionUtils.epsg4326To3857(minLon, minLat);
-    final maxPt = ProjectionUtils.epsg4326To3857(maxLon, maxLat);
-
-    final result = db.select(sql, [maxPt[0], minPt[0], maxPt[1], minPt[1]]);
+    final result = db.select(sql, [maxLon, minLon, maxLat, minLat]);
     return result.map(_rowToRoadSegment).toList();
   }
 
@@ -157,10 +153,7 @@ class GpkgService {
       LIMIT ?
     ''';
 
-    final minPt = ProjectionUtils.epsg4326To3857(minLon, minLat);
-    final maxPt = ProjectionUtils.epsg4326To3857(maxLon, maxLat);
-
-    final result = db.select(sql, [maxPt[0], minPt[0], maxPt[1], minPt[1], limit]);
+    final result = db.select(sql, [maxLon, minLon, maxLat, minLat, limit]);
     return result.map((r) => _rowToPlace(r)).toList();
   }
 
@@ -192,10 +185,7 @@ class GpkgService {
       LIMIT ?
     ''';
 
-    final minPt = ProjectionUtils.epsg4326To3857(minLon, minLat);
-    final maxPt = ProjectionUtils.epsg4326To3857(maxLon, maxLat);
-
-    final result = db.select(sql, [maxPt[0], minPt[0], maxPt[1], minPt[1], limit]);
+    final result = db.select(sql, [maxLon, minLon, maxLat, minLat, limit]);
     return result.map((r) => _rowToPlace(r, hasPopulation: true)).toList();
   }
 
@@ -232,10 +222,7 @@ class GpkgService {
     ''';
 
     try {
-      final minPt = ProjectionUtils.epsg4326To3857(minLon, minLat);
-      final maxPt = ProjectionUtils.epsg4326To3857(maxLon, maxLat);
-
-      final result = db.select(sql, [maxPt[0], minPt[0], maxPt[1], minPt[1], limit]);
+      final result = db.select(sql, [maxLon, minLon, maxLat, minLat, limit]);
       return result.map((row) {
         final geomBytes = row['geom'] as Uint8List;
         List<List<LatLng>> rings;

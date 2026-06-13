@@ -8,6 +8,7 @@ class MapControls extends StatelessWidget {
   final VoidCallback onZoomOut;
   final VoidCallback onMyLocation;
   final VoidCallback onClearRoute;
+  final bool canClearRoute;
 
   const MapControls({
     super.key,
@@ -15,6 +16,7 @@ class MapControls extends StatelessWidget {
     required this.onZoomOut,
     required this.onMyLocation,
     required this.onClearRoute,
+    this.canClearRoute = false,
   });
 
   @override
@@ -50,8 +52,9 @@ class MapControls extends StatelessWidget {
             icon: Icons.close,
             onPressed: onClearRoute,
             tooltip: 'נקה מסלול',
+            isDisabled: !canClearRoute,
             borderRadius: const BorderRadius.vertical(
-              bottom: Radius.circular(16),
+              bottom: Radius.circular(8),
             ),
           ),
         ],
@@ -66,6 +69,7 @@ class _ControlButton extends StatelessWidget {
   final String tooltip;
   final BorderRadius? borderRadius;
   final bool isPrimary;
+  final bool isDisabled;
 
   const _ControlButton({
     required this.icon,
@@ -73,6 +77,7 @@ class _ControlButton extends StatelessWidget {
     required this.tooltip,
     this.borderRadius,
     this.isPrimary = false,
+    this.isDisabled = false,
   });
 
   @override
@@ -82,14 +87,16 @@ class _ControlButton extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onPressed,
+          onTap: isDisabled ? null : onPressed,
           borderRadius: borderRadius,
           child: SizedBox(
             width: 48,
             height: 48,
             child: Icon(
               icon,
-              color: isPrimary
+              color: isDisabled
+                  ? Colors.white.withAlpha(64)
+                  : isPrimary
                   ? AppTheme.routeColor
                   : Colors.white.withAlpha(200),
               size: 22,

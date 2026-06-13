@@ -328,16 +328,32 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
           ),
 
           // כפתורי שליטה
+          Consumer<RoutingService>(
+            builder: (context, routing, _) {
+              final hasNavigationPanel =
+                  routing.hasRoute || routing.origin != null;
+              return AnimatedPositioned(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                right: 16,
+                bottom: hasNavigationPanel ? 300 : 24,
+                child: MapControls(
+                  onZoomIn: _zoomIn,
+                  onZoomOut: _zoomOut,
+                  onMyLocation: _goToMyLocation,
+                  onClearRoute: routing.clearRoute,
+                  canClearRoute: hasNavigationPanel,
+                ),
+              );
+            },
+          ),
+
           Positioned(
-            right: 16,
-            bottom: 200,
-            child: MapControls(
-              onZoomIn: _zoomIn,
-              onZoomOut: _zoomOut,
-              onMyLocation: _goToMyLocation,
-              onClearRoute: () {
-                context.read<RoutingService>().clearRoute();
-              },
+            left: 16,
+            bottom: 24,
+            child: _MapStatusPill(
+              zoom: _currentZoom,
+              isLoading: _isLoading,
             ),
           ),
 
@@ -522,6 +538,54 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
           ],
         );
       },
+    );
+  }
+}
+
+class _MapStatusPill extends StatelessWidget {
+  final double zoom;
+  final bool isLoading;
+
+  const _MapStatusPill({
+    required this.zoom,
+    required this.isLoading,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: AppTheme.glassDecoration,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isLoading) ...[
+              const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              const SizedBox(width: 8),
+            ] else ...[
+              Icon(
+                Icons.layers_outlined,
+                size: 16,
+                color: Colors.white.withAlpha(180),
+              ),
+              const SizedBox(width: 6),
+            ],
+            Text(
+              'זום ${zoom.toStringAsFixed(1)}',
+              style: TextStyle(
+                color: Colors.white.withAlpha(190),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

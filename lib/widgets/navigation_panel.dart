@@ -31,77 +31,83 @@ class NavigationPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: AppTheme.glassDecorationTop,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // ידית גרירה
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(64),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
+    final maxHeight = MediaQuery.sizeOf(context).height * 0.58;
 
-              // בחירת מצב ניתוב
-              _buildModeSelector(context),
-              const SizedBox(height: 16),
-
-              // נקודות מוצא ויעד
-              _buildWaypoints(context),
-
-              // תוצאת מסלול
-              if (route != null) ...[
-                const SizedBox(height: 16),
-                _buildRouteInfo(context),
-              ],
-
-              // אינדיקטור חישוב
-              if (isCalculating) ...[
-                const SizedBox(height: 16),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                    SizedBox(width: 12),
-                    Text('מחשב מסלול...'),
-                  ],
-                ),
-              ],
-
-              const SizedBox(height: 12),
-
-              // כפתור ניקוי
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: onClear,
-                  icon: const Icon(Icons.close, size: 18),
-                  label: const Text('נקה מסלול'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white70,
-                    side: BorderSide(
-                        color: Colors.white.withAlpha(51)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: maxHeight.clamp(260.0, 460.0).toDouble(),
+      ),
+      child: Container(
+        decoration: AppTheme.glassDecorationTop,
+        child: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ידית גרירה
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withAlpha(64),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Text(
+                      route == null ? 'תכנון מסלול' : 'מסלול מוכן',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: onClear,
+                      tooltip: 'נקה מסלול',
+                      icon: const Icon(Icons.close, size: 20),
+                      style: IconButton.styleFrom(
+                        foregroundColor: Colors.white70,
+                        backgroundColor: Colors.white.withAlpha(13),
+                        minimumSize: const Size(36, 36),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // בחירת מצב ניתוב
+                _buildModeSelector(context),
+                const SizedBox(height: 16),
+
+                // נקודות מוצא ויעד
+                _buildWaypoints(context),
+
+                // תוצאת מסלול
+                if (route != null) ...[
+                  const SizedBox(height: 16),
+                  _buildRouteInfo(context),
+                ],
+
+                // אינדיקטור חישוב
+                if (isCalculating) ...[
+                  const SizedBox(height: 16),
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      SizedBox(width: 12),
+                      Text('מחשב מסלול...'),
+                    ],
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
       ),
@@ -109,58 +115,61 @@ class NavigationPanel extends StatelessWidget {
   }
 
   Widget _buildModeSelector(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: RoutingMode.values.map((m) {
-        final isSelected = m == mode;
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            child: Material(
-              color: isSelected
-                  ? AppTheme.routeColor.withAlpha(51)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                onTap: () => onModeChanged(m),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isSelected
-                          ? AppTheme.routeColor
-                          : Colors.white.withAlpha(38),
-                      width: isSelected ? 1.5 : 1,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(m.icon, style: const TextStyle(fontSize: 18)),
-                      const SizedBox(width: 6),
-                      Text(
-                        m.hebrew,
-                        style: TextStyle(
-                          color: isSelected
-                              ? AppTheme.routeColor
-                              : Colors.white70,
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.normal,
-                          fontSize: 13,
-                        ),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: RoutingMode.values.map((m) {
+          final isSelected = m == mode;
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              child: Material(
+                color: isSelected
+                    ? AppTheme.routeColor.withAlpha(51)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+                child: InkWell(
+                  onTap: () => onModeChanged(m),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppTheme.routeColor
+                            : Colors.white.withAlpha(38),
+                        width: isSelected ? 1.5 : 1,
                       ),
-                    ],
+                    ),
+                    child: Row(
+                      children: [
+                        Text(m.icon, style: const TextStyle(fontSize: 18)),
+                        const SizedBox(width: 6),
+                        Text(
+                          m.hebrew,
+                          style: TextStyle(
+                            color: isSelected
+                                ? AppTheme.routeColor
+                                : Colors.white70,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        );
-      }).toList(),
+          );
+        }).toList(),
+      ),
     );
   }
 
@@ -320,10 +329,18 @@ class _WaypointRow extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
         child: Row(
           children: [
-            Icon(icon, color: color, size: 20),
+            Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: color.withAlpha(31),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: color, size: 18),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(

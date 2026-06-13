@@ -29,6 +29,12 @@ class DerechApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
         locale: const Locale('he', 'IL'),
+        builder: (context, child) {
+          return Directionality(
+            textDirection: TextDirection.rtl,
+            child: child ?? const SizedBox.shrink(),
+          );
+        },
         home: const _AppLoader(),
       ),
     );

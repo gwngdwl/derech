@@ -16,6 +16,8 @@ class AppTheme {
   static const _darkCard = Color(0xFF242440);
   static const _darkText = Color(0xFFE8E8F0);
   static const _darkTextSecondary = Color(0xFF9090A8);
+  static const surfaceMuted = Color(0xFF202035);
+  static const panelBorder = Color(0xFF3A3A55);
 
   // Map colors (dark)
   static const mapBackground = Color(0xFF1A1A2E);
@@ -64,7 +66,7 @@ class AppTheme {
         color: _darkCard,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(8),
         ),
       ),
       iconTheme: const IconThemeData(
@@ -83,7 +85,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(8),
           ),
           textStyle: GoogleFonts.heebo(
             fontSize: 16,
@@ -95,7 +97,7 @@ class AppTheme {
         filled: true,
         fillColor: _darkCard,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide.none,
         ),
         contentPadding:
@@ -159,9 +161,9 @@ class AppTheme {
   // ---- Glassmorphism decoration ----
   static BoxDecoration get glassDecoration => BoxDecoration(
         color: _darkCard.withAlpha(200),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Colors.white.withAlpha(25),
+          color: panelBorder.withAlpha(180),
           width: 1,
         ),
         boxShadow: [
@@ -176,10 +178,10 @@ class AppTheme {
   static BoxDecoration get glassDecorationTop => BoxDecoration(
         color: _darkCard.withAlpha(220),
         borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(20),
+          top: Radius.circular(16),
         ),
         border: Border.all(
-          color: Colors.white.withAlpha(25),
+          color: panelBorder.withAlpha(180),
           width: 1,
         ),
         boxShadow: [

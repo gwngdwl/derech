@@ -26,6 +26,7 @@ class _DerSearchBarState extends State<DerSearchBar> {
   List<SearchResult> _results = [];
   bool _isExpanded = false;
   bool _showCategories = false;
+  bool _hasSearched = false;
   Timer? _debounce;
 
   @override
@@ -56,6 +57,7 @@ class _DerSearchBarState extends State<DerSearchBar> {
         setState(() {
           _results = [];
           _showCategories = true;
+          _hasSearched = false;
         });
         return;
       }
@@ -71,6 +73,7 @@ class _DerSearchBarState extends State<DerSearchBar> {
       setState(() {
         _results = results;
         _showCategories = false;
+        _hasSearched = true;
       });
     });
   }
@@ -90,6 +93,7 @@ class _DerSearchBarState extends State<DerSearchBar> {
     setState(() {
       _results = results;
       _showCategories = false;
+      _hasSearched = true;
       _controller.text = category.name;
     });
   }
@@ -101,6 +105,7 @@ class _DerSearchBarState extends State<DerSearchBar> {
     setState(() {
       _isExpanded = false;
       _results = [];
+      _hasSearched = false;
     });
   }
 
@@ -109,6 +114,7 @@ class _DerSearchBarState extends State<DerSearchBar> {
     setState(() {
       _isExpanded = false;
       _results = [];
+      _hasSearched = false;
     });
   }
 
@@ -118,7 +124,8 @@ class _DerSearchBarState extends State<DerSearchBar> {
       mainAxisSize: MainAxisSize.min,
       children: [
         // שורת חיפוש
-        Container(
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
           decoration: AppTheme.glassDecoration,
           child: Row(
             children: [
@@ -136,7 +143,7 @@ class _DerSearchBarState extends State<DerSearchBar> {
                     fontSize: 15,
                   ),
                   decoration: const InputDecoration(
-                    hintText: 'חפש מקום, כתובת או נקודת עניין...',
+                    hintText: 'לאן נוסעים?',
                     border: InputBorder.none,
                     filled: false,
                     contentPadding:
@@ -167,7 +174,8 @@ class _DerSearchBarState extends State<DerSearchBar> {
         // תוצאות / קטגוריות
         if (_isExpanded) ...[
           const SizedBox(height: 8),
-          Container(
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
             constraints: const BoxConstraints(maxHeight: 350),
             decoration: AppTheme.glassDecoration,
             child: _showCategories ? _buildCategories() : _buildResults(),
@@ -201,12 +209,13 @@ class _DerSearchBarState extends State<DerSearchBar> {
             children: QuickCategory.categories.map((cat) {
               return InkWell(
                 onTap: () => _onCategoryTap(cat),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(8),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.white.withAlpha(10),
                     border: Border.all(
                       color: Colors.white.withAlpha(38),
                     ),
@@ -236,12 +245,12 @@ class _DerSearchBarState extends State<DerSearchBar> {
 
   Widget _buildResults() {
     if (_results.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(24),
+      return Padding(
+        padding: const EdgeInsets.all(24),
         child: Center(
           child: Text(
-            'לא נמצאו תוצאות',
-            style: TextStyle(color: Colors.white54),
+            _hasSearched ? 'לא נמצאו תוצאות' : 'התחל להקליד כדי לחפש',
+            style: const TextStyle(color: Colors.white54),
           ),
         ),
       );
@@ -264,7 +273,7 @@ class _DerSearchBarState extends State<DerSearchBar> {
             height: 40,
             decoration: BoxDecoration(
               color: Colors.white.withAlpha(13),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
               child: Text(result.icon, style: const TextStyle(fontSize: 20)),
