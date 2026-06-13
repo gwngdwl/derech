@@ -251,8 +251,17 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     final routing = context.read<RoutingService>();
     if (routing.origin != null && routing.destination != null) {
       await routing.calculateRoute();
-      if (routing.currentRoute != null && mounted) {
+      if (!mounted) return;
+      if (routing.currentRoute != null) {
         _fitRouteInView(routing.currentRoute!);
+      } else if (routing.lastError != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(routing.lastError!),
+            backgroundColor: Colors.red.shade700,
+            duration: const Duration(seconds: 5),
+          ),
+        );
       }
     }
   }

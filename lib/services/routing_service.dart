@@ -14,6 +14,7 @@ class RoutingService extends ChangeNotifier {
   bool _isCalculating = false;
   LatLng? _origin;
   LatLng? _destination;
+  String? _lastError;
 
   RoutingGraph? get graph => _graph;
   RoutingMode get mode => _mode;
@@ -22,6 +23,9 @@ class RoutingService extends ChangeNotifier {
   LatLng? get origin => _origin;
   LatLng? get destination => _destination;
   bool get hasRoute => _currentRoute != null;
+
+  /// סיבת הכישלון האחרונה בחישוב מסלול (null אם הצליח)
+  String? get lastError => _lastError;
 
   /// הגדרת הגרף
   void setGraph(RoutingGraph graph) {
@@ -63,7 +67,21 @@ class RoutingService extends ChangeNotifier {
     final origin = _origin;
     final destination = _destination;
 
-    if (graph == null || origin == null || destination == null) return null;
+    _lastError = null;
+
+    if (origin == null || destination == null) return null;
+
+    if (graph == null) {
+      _lastError = 'גרף הניתוב לא נטען. נסה להפעיל מחדש את האפליקציה.';
+      notifyListeners();
+      return null;
+    }
+
+    if (graph.nodes.isEmpty) {
+      _lastError = 'לא נטענו כבישים מהמפה (הגרף ריק). בדוק את קובץ ה-GPKG.';
+      notifyListeners();
+      return null;
+    }
 
     _isCalculating = true;
     notifyListeners();
@@ -78,7 +96,15 @@ class RoutingService extends ChangeNotifier {
       ));
 
       _currentRoute = result;
+      if (result == null) {
+        _lastError =
+            'לא נמצא מסלול בין הנקודות. ייתכן שהן באזורים מנותקים, '
+            'קרובות מדי, או שאין כבישים מתאימים למצב הניווט שנבחר.';
+      }
       return result;
+    } catch (e) {
+      _lastError = 'שגיאה בחישוב המסלול: $e';
+      return null;
     } finally {
       _isCalculating = false;
       notifyListeners();
