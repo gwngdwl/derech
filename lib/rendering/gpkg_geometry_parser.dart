@@ -27,20 +27,23 @@ class GpkgGeometryParser {
     return _readWkbPoint(data, wkbOffset, is3857);
   }
 
-  /// פירוש POLYGON (בניינים, שטחים) → רשימת נקודות
-  List<List<LatLng>> parsePolygon(Uint8List bytes) {
+  /// פירוש שטח (POLYGON או MULTIPOLYGON) → רשימת פוליגונים, כל פוליגון = רשימת טבעות.
+  /// בודק את סוג הגיאומטריה בפועל מתוך ה-WKB במקום להניח אותו, כדי למנוע פירוש שגוי
+  /// שמייצר קואורדינטות זבל (וקריסה בשכבת ה-Polygon).
+  List<List<List<LatLng>>> parseAreas(Uint8List bytes) {
     final data = ByteData.sublistView(bytes);
     final is3857 = _isEpsg3857(data);
     final wkbOffset = _getWkbOffset(data);
-    return _readWkbPolygon(data, wkbOffset, is3857);
-  }
-
-  /// פירוש MULTIPOLYGON → רשימת פוליגונים
-  List<List<List<LatLng>>> parseMultiPolygon(Uint8List bytes) {
-    final data = ByteData.sublistView(bytes);
-    final is3857 = _isEpsg3857(data);
-    final wkbOffset = _getWkbOffset(data);
-    return _readWkbMultiPolygon(data, wkbOffset, is3857);
+    final geomType = _readGeometryType(data, wkbOffset);
+    // מסכה לטיפול בדגלי Z/M של EWKB (סיביות גבוהות)
+    switch (geomType & 0xFF) {
+      case 3: // POLYGON
+        return [_readWkbPolygon(data, wkbOffset, is3857)];
+      case 6: // MULTIPOLYGON
+        return _readWkbMultiPolygon(data, wkbOffset, is3857);
+      default:
+        return const [];
+    }
   }
 
   /// חילוץ envelope (bounding box) מהגיאומטריה
@@ -92,6 +95,13 @@ class GpkgGeometryParser {
 
     final envelopeSize = envelopeSizes[envelopeIndicator] ?? 0;
     return 8 + envelopeSize; // 8 = GP(2) + version(1) + flags(1) + srs_id(4)
+  }
+
+  /// קריאת סוג הגיאומטריה (geom_type) מתוך כותרת ה-WKB
+  int _readGeometryType(ByteData data, int offset) {
+    final byteOrder = data.getUint8(offset);
+    final endian = byteOrder == 1 ? Endian.little : Endian.big;
+    return data.getUint32(offset + 1, endian);
   }
 
   /// קריאת WKB LINESTRING

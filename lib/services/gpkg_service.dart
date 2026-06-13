@@ -223,26 +223,26 @@ class GpkgService {
 
     try {
       final result = db.select(sql, [maxLon, minLon, maxLat, minLat, limit]);
-      return result.map((row) {
+      final features = <AreaFeature>[];
+      for (final row in result) {
         final geomBytes = row['geom'] as Uint8List;
-        List<List<LatLng>> rings;
+        final fid = row['fid'] as int;
+        final fclass = (row['fclass'] as String?) ?? '';
+
+        List<List<List<LatLng>>> polygons;
         try {
-          rings = _parser.parsePolygon(geomBytes);
+          polygons = _parser.parseAreas(geomBytes);
         } catch (_) {
-          // אם זה MULTIPOLYGON, ניקח רק את הפוליגון הראשון
-          try {
-            final multiPolygon = _parser.parseMultiPolygon(geomBytes);
-            rings = multiPolygon.isNotEmpty ? multiPolygon.first : [];
-          } catch (_) {
-            rings = [];
-          }
+          continue;
         }
-        return AreaFeature(
-          fid: row['fid'] as int,
-          fclass: (row['fclass'] as String?) ?? '',
-          rings: rings,
-        );
-      }).where((a) => a.rings.isNotEmpty).toList();
+
+        // פוליגון נפרד לכל חלק של MULTIPOLYGON כדי שאזורים מרובי-חלקים יוצגו במלואם
+        for (final rings in polygons) {
+          if (rings.isEmpty || rings.first.isEmpty) continue;
+          features.add(AreaFeature(fid: fid, fclass: fclass, rings: rings));
+        }
+      }
+      return features;
     } catch (e) {
       debugPrint('שגיאה בטעינת שטחים מ-$tableName: $e');
       return [];
