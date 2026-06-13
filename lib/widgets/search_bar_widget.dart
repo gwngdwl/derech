@@ -178,7 +178,15 @@ class _DerSearchBarState extends State<DerSearchBar> {
             duration: const Duration(milliseconds: 180),
             constraints: const BoxConstraints(maxHeight: 350),
             decoration: AppTheme.glassDecoration,
-            child: _showCategories ? _buildCategories() : _buildResults(),
+            // Material שקוף כדי ש-ListTile יציירו רקע ו-ink splashes על משטח
+            // נפרד מה-DecoratedBox; ClipRRect כדי שה-splash יכבד את פינות העיגול.
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Material(
+                type: MaterialType.transparency,
+                child: _showCategories ? _buildCategories() : _buildResults(),
+              ),
+            ),
           ),
         ],
       ],
