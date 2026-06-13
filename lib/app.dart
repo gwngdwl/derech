@@ -22,9 +22,7 @@ class DerechApp extends StatelessWidget {
         ChangeNotifierProvider<LocationService>(
           create: (_) => LocationService(),
         ),
-        ChangeNotifierProvider<RoutingService>(
-          create: (_) => RoutingService(),
-        ),
+        ChangeNotifierProvider<RoutingService>(create: (_) => RoutingService()),
       ],
       child: MaterialApp(
         title: 'דרך',
@@ -81,8 +79,7 @@ class _AppLoaderState extends State<_AppLoader>
       final location = context.read<LocationService>();
 
       // חיפוש קובץ ה-GPKG
-      const gpkgPath =
-          r'c:\Users\user\derech\israel-and-palestine-260610-free.gpkg\israel-and-palestine.gpkg';
+      const gpkgPath = r'c:\Users\user\derech\maps\israel-and-palestine.gpkg';
       gpkg.open(gpkgPath);
 
       // שלב 2: בניית גרף ניתוב
@@ -102,8 +99,7 @@ class _AppLoaderState extends State<_AppLoader>
       await Future.delayed(const Duration(milliseconds: 100));
 
       // בניית גרף ב-Isolate (כרגע בthread ראשי כי GraphNode לא serializable)
-      final graph =
-          GraphBuilder.build(roads, routing.mode);
+      final graph = GraphBuilder.build(roads, routing.mode);
       routing.setGraph(graph);
 
       setState(() {
@@ -176,10 +172,9 @@ class _AppLoaderState extends State<_AppLoader>
                   AppTheme.gradient.createShader(bounds),
               child: Text(
                 'דרך',
-                style: Theme.of(context)
-                    .textTheme
-                    .displayLarge
-                    ?.copyWith(color: Colors.white),
+                style: Theme.of(
+                  context,
+                ).textTheme.displayLarge?.copyWith(color: Colors.white),
               ),
             ),
             const SizedBox(height: 8),
